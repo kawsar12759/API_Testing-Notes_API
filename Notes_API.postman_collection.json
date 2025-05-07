@@ -1,0 +1,1803 @@
+{
+	"info": {
+		"_postman_id": "04f91364-6108-4b81-80f0-6959111c615b",
+		"name": "Notes_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43238892",
+		"_collection_link": "https://testteam-4126.postman.co/workspace/demo_workspace~359e5c83-c35a-49ad-b0da-2dc928aa695f/collection/43238892-04f91364-6108-4b81-80f0-6959111c615b?action=share&source=collection_link&creator=43238892"
+	},
+	"item": [
+		{
+			"name": "Get Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"    pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Success: True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Message: Success Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Notes API is Running\")\r",
+							"    })\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"    pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Success: False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"    pm.test(\"Message: Error Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health-check",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===201){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.environment.set(\"id\", jsonData.data.id)\r",
+							"    pm.test(\"Status Code:201 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(201)\r",
+							"    })\r",
+							"    pm.test(\"Message: Registration Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"User account created successfully\")\r",
+							"    })\r",
+							"    pm.test(\"Name Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.name).to.eql(pm.environment.get(\"userName\"))\r",
+							"    })\r",
+							"     pm.test(\"Email Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"userEmail\"))\r",
+							"    })\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    if(jsonData.message===\"Password must be between 6 and 30 characters\"){\r",
+							"        pm.test(\"Message: Password Length Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"A valid email address is required\"){\r",
+							"        pm.test(\"Message: Email Format Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"User name must be between 4 and 30 characters\"){\r",
+							"        pm.test(\"Message: Username Length Validation\")\r",
+							"    }\r",
+							"\r",
+							"    else if(jsonData.message===\"Invalid input data\"){\r",
+							"        pm.test(\"Message: Invalid Input Data Validation\")\r",
+							"    }\r",
+							"\r",
+							"}\r",
+							"\r",
+							"if(statusCode===409){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:409 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(409)\r",
+							"    })\r",
+							"    if(jsonData.message===\"An account already exists with the same email address\"){\r",
+							"        pm.test(\"Message: Already Registered Validation\")\r",
+							"    }\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var userName = pm.variables.replaceIn(\"{{$randomFullName}}\")\r",
+							"pm.environment.set(\"userName\", userName)\r",
+							"\r",
+							"var userEmail = pm.variables.replaceIn(\"{{$randomEmail}}\").toLowerCase()\r",
+							"pm.environment.set(\"userEmail\", userEmail)\r",
+							"\r",
+							"var password = pm.variables.replaceIn(\"{{$randomPassword}}\")\r",
+							"pm.environment.set(\"password\", password)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\": \"{{userName}}\",\r\n        \"email\": \"{{userEmail}}\",\r\n        \"password\": \"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/register",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.environment.set(\"token\",jsonData.data.token)\r",
+							"    pm.environment.set(\"id\", jsonData.data.id)\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Login Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Login successful\")\r",
+							"    })\r",
+							"    pm.test(\"Name Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.name).to.eql(pm.environment.get(\"userName\"))\r",
+							"    })\r",
+							"     pm.test(\"Email Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"userEmail\"))\r",
+							"    })\r",
+							"    if(jsonData.data.token!==null)\r",
+							"    {\r",
+							"        pm.test(\"Token Not Null Validation\")\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message: Bad Request Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"    pm.test(\"Message: Unauthorized Access Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Incorrect email address or password\")\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"email\": \"{{userEmail}}\",\r\n        \"password\": \"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Profile Access Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Profile successful\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Name Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.name).to.eql(pm.environment.get(\"userName\"))\r",
+							"    })\r",
+							"    pm.test(\"Email Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"userEmail\"))\r",
+							"    })\r",
+							"    pm.test(\"ID Validation\", function(){\r",
+							"        pm.expect(jsonData.data.id).to.eql(pm.environment.get(\"id\"))\r",
+							"    })\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message: Bad Request Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "\"application/json\"",
+						"type": "text"
+					},
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users/profile",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Profile Update Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Profile updated successful\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Name Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.name).to.eql(pm.environment.get(\"userName\"))\r",
+							"    })\r",
+							"    pm.test(\"Email Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"userEmail\"))\r",
+							"    })\r",
+							"    pm.test(\"ID Validation\", function(){\r",
+							"        pm.expect(jsonData.data.id).to.eql(pm.environment.get(\"id\"))\r",
+							"    })\r",
+							"    pm.test(\"Phone Validation\", function(){\r",
+							"        pm.expect(jsonData.data.phone).to.eql(pm.environment.get(\"phone\".toString()))\r",
+							"    })\r",
+							"\r",
+							"    pm.test(\"Company Validation\", function(){\r",
+							"        pm.expect(jsonData.data.company).to.eql(pm.environment.get(\"company\"))\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    if(jsonData.message===\"User name must be between 4 and 30 characters\"){\r",
+							"        pm.test(\"Message: Username Length Bad Request Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Phone number should be between 8 and 20 digits\"){\r",
+							"        pm.test(\"Message: Phone Number Length Bad Request Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Company name must be between 4 and 30 characters\"){\r",
+							"        pm.test(\"Message: Company Name Length Bad Request Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var userName = pm.variables.replaceIn(\"{{$randomFullName}}\")\r",
+							"pm.environment.set(\"userName\", userName)\r",
+							"\r",
+							"var phone = pm.variables.replaceIn(\"{{$randomPhoneNumber}}\")\r",
+							"pm.environment.set(\"phone\", phone.replace(/-/g,\"\"))\r",
+							"\r",
+							"var company = pm.variables.replaceIn(\"{{$randomCompanyName}}\")\r",
+							"pm.environment.set(\"company\", company)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "accept",
+						"value": "\"application/json\"",
+						"type": "text"
+					},
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\": \"{{userName}}\",\r\n        \"phone\": \"{{phone}}\",\r\n        \"company\": \"{{company}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/profile",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: LogOut Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"User has been successfully logged out\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "accept",
+						"value": "\"application/json\"",
+						"type": "text"
+					},
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users/logout",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.environment.set(\"token\",jsonData.data.token)\r",
+							"    pm.environment.set(\"id\", jsonData.data.id)\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Login Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Login successful\")\r",
+							"    })\r",
+							"    pm.test(\"Name Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.name).to.eql(pm.environment.get(\"userName\"))\r",
+							"    })\r",
+							"     pm.test(\"Email Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"userEmail\"))\r",
+							"    })\r",
+							"    if(jsonData.data.token!==null)\r",
+							"    {\r",
+							"        pm.test(\"Token Not Null Validation\")\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message: Bad Request Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"    pm.test(\"Message: Unauthorized Access Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Incorrect email address or password\")\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"email\": \"{{userEmail}}\",\r\n        \"password\": \"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Account Deletion Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Account successfully deleted\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "accept",
+						"value": "\"application/json\"",
+						"type": "text"
+					},
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/users/delete-account",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"delete-account"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register User Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===201){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.environment.set(\"id\", jsonData.data.id)\r",
+							"    pm.test(\"Status Code:201 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(201)\r",
+							"    })\r",
+							"    pm.test(\"Message: Registration Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"User account created successfully\")\r",
+							"    })\r",
+							"    pm.test(\"Name Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.name).to.eql(pm.environment.get(\"userName\"))\r",
+							"    })\r",
+							"     pm.test(\"Email Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"userEmail\"))\r",
+							"    })\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    if(jsonData.message===\"Password must be between 6 and 30 characters\"){\r",
+							"        pm.test(\"Message: Password Length Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"A valid email address is required\"){\r",
+							"        pm.test(\"Message: Email Format Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"User name must be between 4 and 30 characters\"){\r",
+							"        pm.test(\"Message: Username Length Validation\")\r",
+							"    }\r",
+							"\r",
+							"    else if(jsonData.message===\"Invalid input data\"){\r",
+							"        pm.test(\"Message: Invalid Input Data Validation\")\r",
+							"    }\r",
+							"\r",
+							"}\r",
+							"\r",
+							"if(statusCode===409){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:409 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(409)\r",
+							"    })\r",
+							"    if(jsonData.message===\"An account already exists with the same email address\"){\r",
+							"        pm.test(\"Message: Already Registered Validation\")\r",
+							"    }\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var userName = pm.variables.replaceIn(\"{{$randomFullName}}\")\r",
+							"pm.environment.set(\"userName\", userName)\r",
+							"\r",
+							"var userEmail = pm.variables.replaceIn(\"{{$randomEmail}}\").toLowerCase()\r",
+							"pm.environment.set(\"userEmail\", userEmail)\r",
+							"\r",
+							"var password = pm.variables.replaceIn(\"{{$randomPassword}}\")\r",
+							"pm.environment.set(\"password\", password)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\": \"{{userName}}\",\r\n        \"email\": \"{{userEmail}}\",\r\n        \"password\": \"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/register",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login User Copy 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.environment.set(\"token\",jsonData.data.token)\r",
+							"    pm.environment.set(\"id\", jsonData.data.id)\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Login Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Login successful\")\r",
+							"    })\r",
+							"    pm.test(\"Name Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.name).to.eql(pm.environment.get(\"userName\"))\r",
+							"    })\r",
+							"     pm.test(\"Email Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.email).to.eql(pm.environment.get(\"userEmail\"))\r",
+							"    })\r",
+							"    if(jsonData.data.token!==null)\r",
+							"    {\r",
+							"        pm.test(\"Token Not Null Validation\")\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message: Bad Request Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"    pm.test(\"Message: Unauthorized Access Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Incorrect email address or password\")\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"email\": \"{{userEmail}}\",\r\n        \"password\": \"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/users/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Notes",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var noteTitle = pm.variables.replaceIn(\"{{$randomLoremWords}}\")\r",
+							"pm.environment.set(\"noteTitle\", noteTitle)\r",
+							"\r",
+							"var noteDescription = pm.variables.replaceIn(\"{{$randomLoremSentences}}\")\r",
+							"pm.environment.set(\"noteDescription\", noteDescription)\r",
+							"\r",
+							"const categories = [\"Home\", \"Work\", \"Personal\"];\r",
+							"const randomIndex = Math.floor(Math.random() * categories.length);\r",
+							"var noteCategory = categories[randomIndex];\r",
+							"pm.environment.set(\"noteCategory\", noteCategory)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.environment.set(\"noteId\", jsonData.data.id)\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Add Note Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Note successfully created\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Note Title Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.title).to.eql(pm.environment.get(\"noteTitle\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Description Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.description).to.eql(pm.environment.get(\"noteDescription\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Category Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.category).to.eql(pm.environment.get(\"noteCategory\"))\r",
+							"    })\r",
+							"    pm.test(\"Completed False Validation\", function(){\r",
+							"        pm.expect(jsonData.data.completed).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"title\": \"{{noteTitle}}\",\r\n        \"description\": \"{{noteDescription}}\",\r\n        \"category\": \"{{noteCategory}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/notes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Notes",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Get Notes Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Notes successfully retrieved\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Note ID Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data[0].id).to.eql(pm.environment.get(\"noteId\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Title Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data[0].title).to.eql(pm.environment.get(\"noteTitle\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Description Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data[0].description).to.eql(pm.environment.get(\"noteDescription\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Category Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data[0].category).to.eql(pm.environment.get(\"noteCategory\"))\r",
+							"    })\r",
+							"    pm.test(\"Completed False Validation\", function(){\r",
+							"        pm.expect(jsonData.data[0].completed).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"    pm.test(\"User ID Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data[0].user_id).to.eql(pm.environment.get(\"id\"))\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "\"application/json\"",
+						"type": "text"
+					},
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/notes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Note by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Get Note by ID Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Note successfully retrieved\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Note ID Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.id).to.eql(pm.environment.get(\"noteId\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Title Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.title).to.eql(pm.environment.get(\"noteTitle\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Description Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.description).to.eql(pm.environment.get(\"noteDescription\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Category Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.category).to.eql(pm.environment.get(\"noteCategory\"))\r",
+							"    })\r",
+							"    pm.test(\"Completed False Validation\", function(){\r",
+							"        pm.expect(jsonData.data.completed).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"    pm.test(\"User ID Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.user_id).to.eql(pm.environment.get(\"id\"))\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "\"application/json\"",
+						"type": "text"
+					},
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/notes/{{noteId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Note",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Update Note Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Note successfully Updated\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Note ID Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.id).to.eql(pm.environment.get(\"noteId\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Title Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.title).to.eql(pm.environment.get(\"noteTitle\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Description Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.description).to.eql(pm.environment.get(\"noteDescription\"))\r",
+							"    })\r",
+							"    pm.test(\"Note Category Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.category).to.eql(pm.environment.get(\"noteCategory\"))\r",
+							"    })\r",
+							"    pm.test(\"Completed False Validation\", function(){\r",
+							"        pm.expect(jsonData.data.completed).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"    pm.test(\"User ID Field Validation\", function(){\r",
+							"        pm.expect(jsonData.data.user_id).to.eql(pm.environment.get(\"id\"))\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var noteTitle = pm.variables.replaceIn(\"{{$randomLoremWords}}\")\r",
+							"pm.environment.set(\"noteTitle\", noteTitle)\r",
+							"\r",
+							"var noteDescription = pm.variables.replaceIn(\"{{$randomLoremSentences}}\")\r",
+							"pm.environment.set(\"noteDescription\", noteDescription)\r",
+							"\r",
+							"var completed = pm.variables.replaceIn(\"{{$randomBoolean}}\")\r",
+							"pm.environment.set(\"completed\", completed)\r",
+							"\r",
+							"const categories = [\"Home\", \"Work\", \"Personal\"];\r",
+							"const randomIndex = Math.floor(Math.random() * categories.length);\r",
+							"var noteCategory = categories[randomIndex];\r",
+							"pm.environment.set(\"noteCategory\", noteCategory)\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"title\": \"{{noteTitle}}\",\r\n        \"description\": \"{{noteDescription}}\",\r\n        \"completed\": {{completed}},\r\n        \"category\": \"{{noteCategory}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/notes/{{noteId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Partially Update Note",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Update Note Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Note successfully Updated\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"    pm.test(\"Completed Validation\", function(){\r",
+							"        pm.expect(jsonData.data.completed.toString()).to.eql(pm.environment.get(\"completed\"))\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"var completed = pm.variables.replaceIn(\"{{$randomBoolean}}\")\r",
+							"pm.environment.set(\"completed\", completed)\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\r\n        \"completed\": {{completed}}\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/notes/{{noteId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Note",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var statusCode = pm.response.code\r",
+							"\r",
+							"if(statusCode===200){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:200 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(200)\r",
+							"    })\r",
+							"    pm.test(\"Message: Delete Note Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Note successfully deleted\")\r",
+							"    })\r",
+							"    pm.test(\"Success:True Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(true)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===400){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:400 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(400)\r",
+							"    })\r",
+							"    pm.test(\"Message:Bad Request Validaion\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Bad Request\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"   \r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===401){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:401 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(401)\r",
+							"    })\r",
+							"\r",
+							"    if(jsonData.message===\"No authentication token specified in x-auth-token header\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    else if(jsonData.message===\"Access token is not valid or has expired, you will need to login\"){\r",
+							"         pm.test(\"Message: Unauthorized Access Validation\")\r",
+							"    }\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"\r",
+							"}\r",
+							"\r",
+							"else if(statusCode===500){\r",
+							"    var jsonData = pm.response.json()\r",
+							"    pm.test(\"Status Code:500 Validaion\", function(){\r",
+							"        pm.expect(jsonData.status).to.eql(500)\r",
+							"    })\r",
+							"    pm.test(\"Message: Internal Server Error Validation\", function(){\r",
+							"        pm.expect(jsonData.message).to.eql(\"Internal Error Server\")\r",
+							"    })\r",
+							"    pm.test(\"Success:False Validaion\", function(){\r",
+							"        pm.expect(jsonData.success).to.eql(false)\r",
+							"    })\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-auth-token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/notes/{{noteId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
